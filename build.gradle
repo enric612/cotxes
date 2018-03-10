@@ -17,7 +17,10 @@ plugins {
 }
 
 // Define the main class for the application
-mainClassName = 'App'
+mainClassName = 'main.cotxes.ui.Principal'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 dependencies {
     // This dependency is found on compile classpath of this component and consumers.
@@ -25,6 +28,9 @@ dependencies {
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
+    
+    // HSQLDB 
+    testCompile group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'    
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -32,4 +38,10 @@ repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'cotxes.ui.Principal'
+    }
 }
