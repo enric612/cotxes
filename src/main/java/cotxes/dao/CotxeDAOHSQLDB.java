@@ -3,6 +3,8 @@
  */
 package cotxes.dao;
 
+import java.util.Vector;
+
 import cotxes.models.Cotxe;
 
 /**
@@ -16,7 +18,7 @@ public class CotxeDAOHSQLDB implements CotxeDAO {
 	 */
 	@Override
 	public void insertCotxe(Cotxe c) {
-		// TODO Auto-generated method stub
+		// TODO this method		
 
 	}
 
