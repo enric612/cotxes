@@ -109,8 +109,10 @@ public class CotxeLoader extends JFrame {
 		btnGuardar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-					ActionPerformer.addCotxe(CotxeLoader.this);
-					dispose();
+					if(ActionPerformer.addCotxe(CotxeLoader.this)) {
+						dispose();
+					}
+					
 				
 				
 			}
