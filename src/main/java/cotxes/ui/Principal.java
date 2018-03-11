@@ -259,13 +259,16 @@ public class Principal extends JFrame {
 
 	// Helper methods, millor fero desde asi que utilitzant elements protected
 
-	public void obrirCotxeLoader(Cotxe c) {
+	public void obrirCotxeLoader(Cotxe c) {			
 		cotxeLoader = new CotxeLoader(model);
 		if (c != null) {
 			cotxeLoader.replaceElement(c);
 		}
 		cotxeLoader.setVisible(true);
 		cotxeLoader.setLocationRelativeTo(Principal.this);
+		// Mentre treballem en l'altra finestra desactivem este menu per si acas
+		this.mnEditar.setEnabled(false);
+		this.table.clearSelection();
 	}
 
 	public Cotxe getCotxe(int i) {
