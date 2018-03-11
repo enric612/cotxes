@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import cotxes.models.Cotxe;
+
 import java.awt.Toolkit;
 import javax.swing.JMenu;
 import javax.swing.JLabel;
@@ -22,15 +24,21 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Vector;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Principal extends JFrame {
 
 	private JPanel contentPane;
 	private JTable table;
-	private CotxeLoader cotxeLoader;
-	private DefaultTableModel model;
+	private  CotxeLoader cotxeLoader;
+	private CotxeTableModel model;
+	private JMenu mnEditar;
+	private JMenuItem mntmEditar;
+	private JMenuItem mntmEliminar;
 
 	/**
 	 * Launch the application.
@@ -58,10 +66,7 @@ public class Principal extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				
-				int response = JOptionPane.showConfirmDialog(Principal.this, "Segur que vols eixir?");
-				if(response == JOptionPane.OK_OPTION){
-					System.exit(0);
-				}
+				eixir();
 				
 			}
 		});
@@ -108,20 +113,54 @@ public class Principal extends JFrame {
 		mnFitxer.addSeparator();
 		
 		JMenuItem mntmEixir = new JMenuItem("Eixir");
+		mntmEixir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				eixir();
+			}
+		});
 		mntmEixir.setFont(new Font("Arial", Font.PLAIN, 14));
 		mnFitxer.add(mntmEixir);
 		
-		JMenu mnEditar = new JMenu("Selecci\u00F3");
+		mnEditar = new JMenu("Selecci\u00F3");
+		mnEditar.setEnabled(false);
 		mnEditar.setFont(new Font("Arial", Font.PLAIN, 14));
 		menuBar.add(mnEditar);
 		
-		JMenuItem mntmEditar = new JMenuItem("Editar");
+		mntmEditar = new JMenuItem("Editar");
+		mntmEditar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int i = Principal.this.table.getSelectedRow();
+				if(i>=0) {
+					ActionPerformer.obrirSeleccio(i, Principal.this);
+				}else {
+					JOptionPane.showMessageDialog(Principal.this, "Per favor selecciona un element a editar de la taula.");
+				}
+			}
+		});
 		mntmEditar.setFont(new Font("Arial", Font.PLAIN, 14));
 		// Per defecte deshabilitem esta opció fins que l'usuari selecciona un element
 		mntmEditar.setEnabled(false);
 		mnEditar.add(mntmEditar);
 		
-		JMenuItem mntmEliminar = new JMenuItem("Eliminar");
+		mntmEliminar = new JMenuItem("Eliminar");
+		mntmEliminar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int i = Principal.this.table.getSelectedRow();
+				if(i>=0) {
+					Principal.this.model.eliminarFila(i);
+					// Si ens quedem sense elements desactivem els menus de selecció
+					if(Principal.this.table.getRowCount() == 0)
+					{
+						Principal.this.mnEditar.setEnabled(false);
+						Principal.this.mntmEditar.setEnabled(false);
+						Principal.this.mntmEliminar.setEnabled(false);
+					}
+				}else {
+					JOptionPane.showMessageDialog(Principal.this, "Per favor selecciona un element a eliminar de la taula.");
+				}
+				
+			}
+		});
 		mntmEliminar.setFont(new Font("Arial", Font.PLAIN, 14));
 		// Per defecte deshabilitem esta opció fins que l'usuari selecciona un element
 		mntmEliminar.setEnabled(false);
@@ -153,21 +192,69 @@ public class Principal extends JFrame {
 		// Este diccionari el podem crear a partir de la classe model Cotxe pero aquesta aplicació es molt senzilla i especifica i no es necesari ja que estem
 		// lligats a una tabla predefinida en BD. En cas de voler aprofitar una mateixa tabla per a diferents models, per exemple tindre cotxes i camions en funció 
 		// de un menu o altre (Fitxer carregar dades cotxes, Fitxer carregar dades camions) si seria interessant. 
-		model = new DefaultTableModel(null, new String[] {"Matricula", "Marca", "Model", "Color", "Nombre de portes"});
-		model.addRow(new String[] {"123456ABC", "BMW", "Serie 1", "Roig", "4"});
+		model = new CotxeTableModel();
+		model.addCotxe(new Cotxe("12345DAB", "BMW", "Serie 1", "Roig",4));
+		model.reload();
 		
-		table = new JTable(model);
+		// Evitem que els usuaris puguen editar els elements de la tabla fora del nostre sistema.
+		table = new JTable(model){
+	        private static final long serialVersionUID = 1L;
+
+	        public boolean isCellEditable(int row, int column) {                
+	                return false;               
+	        };
+	    };
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(Principal.this.table.getSelectedRowCount() == 1) {
+					Principal.this.mnEditar.setEnabled(true);
+					Principal.this.mntmEditar.setEnabled(true);
+					Principal.this.mntmEliminar.setEnabled(true);
+				}
+					
+			}
+		});
 		table.setFont(new Font("Arial", Font.PLAIN, 14));		
 		scrollPane.setViewportView(table);
 	}
 	
-	private void tancarCotxeLoader()
+	
+	// Helper methods, millor fero desde asi que utilitzant elements protected
+	
+	public void obrirCotxeLoader(Cotxe c) {
+		cotxeLoader = new CotxeLoader(model);
+		if(c != null)
+		{
+			cotxeLoader.replaceElement(c);
+		}		
+		cotxeLoader.setVisible(true);
+		cotxeLoader.setLocationRelativeTo(Principal.this);
+	}
+	
+	
+	public Cotxe getCotxe(int i){
+		return this.model.getFila(i);		
+	}
+	
+	public void afegirFila(Vector fila) {
+		// TODO
+	}
+	
+	
+	public void tancarCotxeLoader()
 	{
 		// Evitem multiples finestres i ens asegurem que crer una finestra buida
 		cotxeLoader.dispose();
-		cotxeLoader = new CotxeLoader(model);
-		cotxeLoader.setVisible(true);
-		cotxeLoader.setLocationRelativeTo(Principal.this);
+		this.obrirCotxeLoader(null);
+	}
+	
+	public void eixir()
+	{
+		int response = JOptionPane.showConfirmDialog(Principal.this, "Segur que vols eixir?");
+		if(response == JOptionPane.OK_OPTION){
+			System.exit(0);
+		}
 	}
 	
 	
