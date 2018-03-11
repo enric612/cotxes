@@ -9,6 +9,9 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import cotxes.excepcions.CotxeJaExisteixException;
+import cotxes.excepcions.CotxeNoEliminatException;
+import cotxes.excepcions.CotxeNoExisteixException;
 import cotxes.models.Cotxe;
 
 import java.awt.Toolkit;
@@ -21,6 +24,7 @@ import javax.swing.JOptionPane;
 import java.awt.Font;
 import java.awt.ScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.JScrollPane;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -147,7 +151,11 @@ public class Principal extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				int i = Principal.this.table.getSelectedRow();
 				if(i>=0) {
-					Principal.this.model.eliminarFila(i);
+					try {
+						Principal.this.model.eliminarFila(i);
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null, e.getMessage());
+					}
 					// Si ens quedem sense elements desactivem els menus de selecció
 					if(Principal.this.table.getRowCount() == 0)
 					{
@@ -193,7 +201,11 @@ public class Principal extends JFrame {
 		// lligats a una tabla predefinida en BD. En cas de voler aprofitar una mateixa tabla per a diferents models, per exemple tindre cotxes i camions en funció 
 		// de un menu o altre (Fitxer carregar dades cotxes, Fitxer carregar dades camions) si seria interessant. 
 		model = new CotxeTableModel();
-		model.addCotxe(new Cotxe("12345DAB", "BMW", "Serie 1", "Roig",4));
+		try {
+			model.addCotxe(new Cotxe("12345DAB", "BMW", "Serie 1", "Roig",4));
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
 		model.reload();
 		
 		// Evitem que els usuaris puguen editar els elements de la tabla fora del nostre sistema.
@@ -204,6 +216,7 @@ public class Principal extends JFrame {
 	                return false;               
 	        };
 	    };
+	    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -237,9 +250,6 @@ public class Principal extends JFrame {
 		return this.model.getFila(i);		
 	}
 	
-	public void afegirFila(Vector fila) {
-		// TODO
-	}
 	
 	
 	public void tancarCotxeLoader()

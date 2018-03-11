@@ -30,7 +30,9 @@ dependencies {
     testCompile 'junit:junit:4.12'
     
     // HSQLDB 
-    testCompile group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'    
+   // https://mvnrepository.com/artifact/org.hsqldb/hsqldb
+	testCompile group: 'org.hsqldb', name: 'hsqldb', version: '2.2.4'
+ 
 }
 
 // In this section you declare where to find the dependencies of your project

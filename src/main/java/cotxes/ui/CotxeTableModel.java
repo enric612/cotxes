@@ -7,20 +7,35 @@ import javax.swing.table.DefaultTableModel;
 
 import cotxes.models.Cotxe;
 
+// Aso ho fem aixina per comoditat pero deuriem de gastar la interficie CotxeDAO i mitjançant injecció de dependencies configurar la implementació que nececitem.
+import cotxes.dao.CotxeDAOHSQLDB;
+import cotxes.excepcions.CotxeJaExisteixException;
+import cotxes.excepcions.CotxeNoEliminatException;
+import cotxes.excepcions.CotxeNoExisteixException;
+
 public class CotxeTableModel extends DefaultTableModel {
 	
-	private ArrayList<Cotxe> cotxesList;
+	private ArrayList<Cotxe> cotxesList;	
+	private CotxeDAOHSQLDB dao;
 	
 	public CotxeTableModel(){
-		super(null, new String[] {"Matricula", "Marca", "Model", "Color", "Nombre de portes"});
-		this.cotxesList = new ArrayList<Cotxe>();
+		super(null, new String[] {"Matricula", "Marca", "Model", "Color", "Nombre de portes"});		
+		// Al inici careguem la BD
+		//DAO
+		this.dao = new CotxeDAOHSQLDB();
+		this.cotxesList = this.dao.getAll();
+		this.reload();
+		
 	}
 	
 	public Cotxe getFila(int i) {
 		return this.cotxesList.get(i);
 	}
 	
-	public void eliminarFila(int i) {
+	public void eliminarFila(int i) throws CotxeNoEliminatException {
+		String matricula = this.cotxesList.get(i).getMatricula();
+		this.dao.deleteCotxe(matricula);
+		this.cotxesList.remove(i);
 		this.removeRow(i);
 	}
 	
@@ -32,12 +47,14 @@ public class CotxeTableModel extends DefaultTableModel {
 	}
 	
 	
-	public void addCotxe(Cotxe c)
+	public void addCotxe(Cotxe c) throws CotxeJaExisteixException, CotxeNoExisteixException
 	{
 		if (this.cotxesList.contains(c)) {
+			this.dao.updateCotxe(c);
 			this.cotxesList.set(this.cotxesList.indexOf(c), c);
 			this.reload();
 		}else {
+			this.dao.insertCotxe(c);
 			this.cotxesList.add(c);
 			this.addFila(c);
 		}

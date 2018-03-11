@@ -4,6 +4,8 @@ import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
+import cotxes.excepcions.CotxeJaExisteixException;
+import cotxes.excepcions.CotxeNoExisteixException;
 import cotxes.models.Cotxe;
 
 public class ActionPerformer {
@@ -66,7 +68,11 @@ public class ActionPerformer {
 			return false;
 		}
 		
-		cl.model.addCotxe(c);
+		try {
+			cl.model.addCotxe(c);
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		} 
 
 		return true;
 
