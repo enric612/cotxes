@@ -14,6 +14,7 @@ Gradle, JDK >=7
 ```
 gradle build
 gradle eclipse
+gradle compilar
 java -jar build/libs/cotxes.jar
 
 ``` 

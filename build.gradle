@@ -31,7 +31,7 @@ dependencies {
     
     // HSQLDB 
    // https://mvnrepository.com/artifact/org.hsqldb/hsqldb
-	testCompile group: 'org.hsqldb', name: 'hsqldb', version: '2.2.4'
+	compile group: 'org.hsqldb', name: 'hsqldb', version: '2.2.4'
  
 }
 
@@ -46,4 +46,16 @@ jar {
     manifest {
         attributes 'Main-Class': 'cotxes.ui.Principal'
     }
+	from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task compilar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'cotxes.ui.Principal'
+    }
+    baseName = 'cotxes'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
